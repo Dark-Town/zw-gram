@@ -6,48 +6,52 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/common/Header';
 import { register } from '@/api/user.api';
 
+const cards = ['♠️', '♣️', '♥️', '♦️'];
+
 const Register: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [showCaptcha, setShowCaptcha] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [showGame, setShowGame] = useState(false);
+  const [matched, setMatched] = useState(false);
+  const [shuffledCards, setShuffledCards] = useState<string[]>([]);
   const navigate = useNavigate();
+
+  const shuffleCards = () => {
+    const deck = [...cards, '♠️']; // Add 2 spades for easier match
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    setShuffledCards(deck);
+  };
 
   const handleSignup = (e: FormEvent) => {
     e.preventDefault();
-    setError('');
-
     if (!username || !email || !password) {
       setError('All fields are required.');
       return;
     }
-
-    setShowCaptcha(true); // Show fake captcha
+    setError('');
+    setShowGame(true);
+    shuffleCards();
   };
 
-  const handleCaptchaVerify = () => {
-    setIsVerifying(true);
-    setTimeout(async () => {
-      setShowCaptcha(false);
-      setIsVerifying(false);
-      await continueSignup();
-    }, 2000);
-  };
-
-  const continueSignup = async () => {
-    try {
-      const response = await register(username, email, password);
-      if (response.success) {
-        toast.success(response.message || 'Registered successfully!');
-        navigate('/login');
-      } else {
-        setError(response.message || 'Registration failed.');
-      }
-    } catch (error: any) {
-      toast.error('Signup failed. Please try again.');
-      setError('Signup failed. Please check your details.');
+  const handleCardClick = async (card: string) => {
+    if (card === '♠️') {
+      setMatched(true);
+      setTimeout(async () => {
+        const response = await register(username, email, password);
+        if (response.success) {
+          toast.success('Verified & registered!');
+          navigate('/login');
+        } else {
+          setError(response.message || 'Registration failed.');
+        }
+      }, 1000);
+    } else {
+      toast.error('Try again!');
     }
   };
 
@@ -66,9 +70,7 @@ const Register: React.FC = () => {
           <div className="px-6 py-8">
             <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Sign Up</h2>
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>
             )}
             <form onSubmit={handleSignup} className="space-y-6">
               <div>
@@ -89,35 +91,33 @@ const Register: React.FC = () => {
                 </Button>
               </div>
             </form>
-            <p className="mt-4 text-sm text-center text-blue-600 hover:underline cursor-pointer" onClick={() => navigate('/login')}>
+            <p
+              className="mt-4 text-sm text-center text-blue-600 hover:underline cursor-pointer"
+              onClick={() => navigate('/login')}
+            >
               Already have an account? Log in
             </p>
           </div>
         </div>
       </div>
 
-      {/* Fake Captcha Modal */}
-      {showCaptcha && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl w-[320px] text-center">
-            <p className="text-lg font-semibold text-gray-800 mb-4">Security Check</p>
-            {!isVerifying ? (
-              <div
-                onClick={handleCaptchaVerify}
-                className="flex items-center justify-center gap-3 border rounded-md py-2 px-4 cursor-pointer hover:shadow-lg transition"
-              >
-                <div className="w-5 h-5 border-2 border-gray-500 rounded-sm flex items-center justify-center">
-                  <div className="w-2.5 h-2.5 bg-blue-600 rounded-full" />
+      {/* Game Modal */}
+      {showGame && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl text-center w-[340px]">
+            <h3 className="text-xl font-bold mb-2 text-gray-800">Verify: Click a ♠️ card</h3>
+            <div className="grid grid-cols-3 gap-3 mt-4">
+              {shuffledCards.map((card, i) => (
+                <div
+                  key={i}
+                  onClick={() => handleCardClick(card)}
+                  className="w-16 h-20 border border-gray-300 rounded-md flex items-center justify-center text-2xl bg-purple-100 hover:bg-purple-200 cursor-pointer"
+                >
+                  {card}
                 </div>
-                <span className="text-sm text-gray-700">I'm not a robot</span>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center">
-                <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-3" />
-                <p className="text-sm text-gray-600">Verifying...</p>
-              </div>
-            )}
-            <p className="text-xs text-gray-400 mt-4">By verifying, you allow this site to register your account.</p>
+              ))}
+            </div>
+            <p className="text-xs mt-4 text-gray-500">This site uses fun verification instead of CAPTCHA.</p>
           </div>
         </div>
       )}
