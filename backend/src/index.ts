@@ -20,7 +20,7 @@ app.use(urlencoded({extended:true})); // for parsing different types of url
 
 // replace with your frontend urls
 // const corsAllowOrigin = {
-//   origin: ['http://localhost:5173', 'https://tchargram.vercel.app', 'https://social-media-tchar.onrender.com'],
+//   origin: ['http://localhost:5173', 'https://zw-gram.vercel.app', 'https://zw-gram.onrender.com'],
 //   credentials: true
 // };
 // app.use(cors(corsAllowOrigin));
