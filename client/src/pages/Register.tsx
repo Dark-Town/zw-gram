@@ -6,14 +6,15 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/common/Header';
 import { register } from '@/api/user.api';
 
-const Register: React.FC = () => {
+  const Register: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showCaptcha, setShowCaptcha] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignup = async (e: FormEvent) => {
+  const handleSignup = (e: FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -22,8 +23,17 @@ const Register: React.FC = () => {
       return;
     }
 
+    setShowCaptcha(true);
+
+    setTimeout(() => {
+      continueSignup();
+    }, 3000);
+  };
+
+  const continueSignup = async () => {
     try {
-      const response = await register(username,email,password);
+      const response = await register(username, email, password);
+      setShowCaptcha(false);
 
       if (response.success) {
         toast.success(response.message);
@@ -33,6 +43,7 @@ const Register: React.FC = () => {
       console.error('Signup failed:', error);
       toast.error('Signup failed. Please try again.');
       setError('Signup failed. Please check your details and try again.');
+      setShowCaptcha(false);
     }
   };
 
@@ -69,7 +80,6 @@ const Register: React.FC = () => {
                   value={username}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 />
               </div>
               <div>
@@ -81,7 +91,6 @@ const Register: React.FC = () => {
                   value={email}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 />
               </div>
               <div>
@@ -93,7 +102,6 @@ const Register: React.FC = () => {
                   value={password}
                   onChange={handleChange}
                   required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                 />
               </div>
               <div>
@@ -105,11 +113,23 @@ const Register: React.FC = () => {
                 </Button>
               </div>
             </form>
-            <p className='mt-2 cursor-pointer hover:text-blue-800' onClick={() => navigate('/login')}>Already have an account? Log in</p>
+            <p className='mt-2 cursor-pointer hover:text-blue-800' onClick={() => navigate('/login')}>
+              Already have an account? Log in
+            </p>
           </div>
-          
         </div>
       </div>
+
+      {/* Fake CAPTCHA Loader */}
+      {showCaptcha && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center w-80">
+            <h2 className="text-lg font-semibold mb-2 text-gray-800">Verifying...</h2>
+            <p className="text-sm text-gray-600 mb-4">Please wait while we verify you're not a robot.</p>
+            <div className="w-12 h-12 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
