@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/common/Header';
 import { register } from '@/api/user.api';
 
-const emojiPairs = ['🎉', '🎉', '🔥', '🔥', '⚡', '⚡'];
+  const emojiPairs = ['🎉', '🎉', '🔥', '🔥', '⚡', '⚡'];
 
-const shuffleArray = (array: string[]) => {
+  const shuffleArray = (array: string[]) => {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -17,7 +17,7 @@ const shuffleArray = (array: string[]) => {
   return shuffled;
 };
 
-const Register: React.FC = () => {
+  const Register: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
