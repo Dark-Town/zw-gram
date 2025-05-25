@@ -6,27 +6,13 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/common/Header';
 import { register } from '@/api/user.api';
 
-  const emojiPairs = ['🎉', '🎉', '🔥', '🔥', '⚡', '⚡'];
-
-  const shuffleArray = (array: string[]) => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
-
-  const Register: React.FC = () => {
+const Register: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showCaptcha, setShowCaptcha] = useState(false);
-  const [cards, setCards] = useState<string[]>([]);
-  const [flipped, setFlipped] = useState<number[]>([]);
-  const [matched, setMatched] = useState<number[]>([]);
-
+  const [isVerifying, setIsVerifying] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = (e: FormEvent) => {
@@ -38,35 +24,16 @@ import { register } from '@/api/user.api';
       return;
     }
 
-    // Launch card match verification
-    setCards(shuffleArray(emojiPairs));
-    setFlipped([]);
-    setMatched([]);
-    setShowCaptcha(true);
+    setShowCaptcha(true); // Show fake captcha
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    if (name === 'username') setUsername(value);
-    if (name === 'email') setEmail(value);
-    if (name === 'password') setPassword(value);
-  };
-
-  const handleCardClick = (index: number) => {
-    if (flipped.length === 2 || flipped.includes(index) || matched.includes(index)) return;
-
-    const newFlipped = [...flipped, index];
-    setFlipped(newFlipped);
-
-    if (newFlipped.length === 2) {
-      const [first, second] = newFlipped;
-      if (cards[first] === cards[second]) {
-        setMatched([...matched, first, second]);
-        setFlipped([]);
-      } else {
-        setTimeout(() => setFlipped([]), 1000);
-      }
-    }
+  const handleCaptchaVerify = () => {
+    setIsVerifying(true);
+    setTimeout(async () => {
+      setShowCaptcha(false);
+      setIsVerifying(false);
+      await continueSignup();
+    }, 2000);
   };
 
   const continueSignup = async () => {
@@ -78,16 +45,18 @@ import { register } from '@/api/user.api';
       } else {
         setError(response.message || 'Registration failed.');
       }
-    } catch (err) {
+    } catch (error: any) {
       toast.error('Signup failed. Please try again.');
       setError('Signup failed. Please check your details.');
     }
   };
 
-  if (matched.length === cards.length && showCaptcha) {
-    setShowCaptcha(false);
-    continueSignup();
-  }
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === 'username') setUsername(value);
+    if (name === 'email') setEmail(value);
+    if (name === 'password') setPassword(value);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-gray-900 to-purple-900">
@@ -127,24 +96,28 @@ import { register } from '@/api/user.api';
         </div>
       </div>
 
-      {/* Card Match Captcha Modal */}
+      {/* Fake Captcha Modal */}
       {showCaptcha && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl text-center w-[350px]">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">Match the Cards</h3>
-            <p className="text-sm mb-4 text-gray-600">Tap to match all pairs to verify you're human.</p>
-            <div className="grid grid-cols-3 gap-3 justify-items-center">
-              {cards.map((card, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleCardClick(index)}
-                  className="w-16 h-16 border rounded-lg flex items-center justify-center text-2xl bg-gray-100 hover:bg-gray-200"
-                >
-                  {flipped.includes(index) || matched.includes(index) ? card : '❓'}
-                </button>
-              ))}
-            </div>
-            <p className="mt-4 text-xs text-gray-500">This prevents spam signups.</p>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-[320px] text-center">
+            <p className="text-lg font-semibold text-gray-800 mb-4">Security Check</p>
+            {!isVerifying ? (
+              <div
+                onClick={handleCaptchaVerify}
+                className="flex items-center justify-center gap-3 border rounded-md py-2 px-4 cursor-pointer hover:shadow-lg transition"
+              >
+                <div className="w-5 h-5 border-2 border-gray-500 rounded-sm flex items-center justify-center">
+                  <div className="w-2.5 h-2.5 bg-blue-600 rounded-full" />
+                </div>
+                <span className="text-sm text-gray-700">I'm not a robot</span>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center">
+                <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-3" />
+                <p className="text-sm text-gray-600">Verifying...</p>
+              </div>
+            )}
+            <p className="text-xs text-gray-400 mt-4">By verifying, you allow this site to register your account.</p>
           </div>
         </div>
       )}
