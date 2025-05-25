@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/common/Header';
 import { register } from '@/api/user.api';
 
-const cards = ['♠️', '♣️', '♥️', '♦️'];
+  const cards = ['♠️', '♣️', '♥️', '♦️'];
 
-const Register: React.FC = () => {
+  const Register: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +18,7 @@ const Register: React.FC = () => {
   const [shuffledCards, setShuffledCards] = useState<string[]>([]);
   const navigate = useNavigate();
 
-  const shuffleCards = () => {
+    const shuffleCards = () => {
     const deck = [...cards, '♠️']; // Add 2 spades for easier match
     for (let i = deck.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
