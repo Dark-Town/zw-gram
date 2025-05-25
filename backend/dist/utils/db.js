@@ -1,17 +1,21 @@
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-dotenv.config();
-const connectDB = async () => {
-    try {
-        if (!process.env.MONGO_URI) {
-            throw new Error("MONGO_URI is not defined in environment variables.");
-        }
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log("MongoDB connected successfully.");
-    }
-    catch (error) {
-        console.error("Error connecting to MongoDB:", error);
-        process.exit(1);
-    }
-};
-export default connectDB;
+   import { Client } from 'pg';
+   import dotenv from 'dotenv';
+
+   dotenv.config();
+
+   const connectDB = async (): Promise<void> => {
+       const client = new Client({
+           connectionString: process.env.DATABASE_URL, // Use your PostgreSQL connection string here
+       });
+
+       try {
+           await client.connect();
+           console.log('PostgreSQL connected successfully.');
+       } catch (error) {
+           console.error('Error connecting to PostgreSQL:', error);
+           process.exit(1);
+       }
+   };
+
+   export default connectDB;
+   
