@@ -96,7 +96,7 @@ const Landing: React.FC = () => {
         </main>
         <footer className="bg-gray-900 py-8 mt-16 border-t border-gray-800">
           <div className="container mx-auto px-4 text-center text-gray-400">
-            <p>&copy; 2024 TcharGram. All rights reserved. made with 💗 by Trishit Char</p>
+            <p>&copy; 2025 ZwGram. All rights reserved. made with 💗 by  Tcroneb Hackx</p>
           </div>
         </footer>
       </div>
