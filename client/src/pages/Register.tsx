@@ -6,12 +6,14 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/common/Header';
 import { register } from '@/api/user.api';
 
-  const Register: React.FC = () => {
+const Register: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [loadingVerify, setLoadingVerify] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = (e: FormEvent) => {
@@ -23,17 +25,23 @@ import { register } from '@/api/user.api';
       return;
     }
 
+    // Show CAPTCHA box
     setShowCaptcha(true);
+  };
 
+  const handleCaptchaClick = () => {
+    setLoadingVerify(true);
     setTimeout(() => {
+      setCaptchaVerified(true);
+      setLoadingVerify(false);
+      setShowCaptcha(false);
       continueSignup();
-    }, 3000);
+    }, 2000);
   };
 
   const continueSignup = async () => {
     try {
       const response = await register(username, email, password);
-      setShowCaptcha(false);
 
       if (response.success) {
         toast.success(response.message);
@@ -43,7 +51,6 @@ import { register } from '@/api/user.api';
       console.error('Signup failed:', error);
       toast.error('Signup failed. Please try again.');
       setError('Signup failed. Please check your details and try again.');
-      setShowCaptcha(false);
     }
   };
 
@@ -120,13 +127,30 @@ import { register } from '@/api/user.api';
         </div>
       </div>
 
-      {/* Fake CAPTCHA Loader */}
+      {/* Fake CAPTCHA Box */}
       {showCaptcha && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center w-80">
-            <h2 className="text-lg font-semibold mb-2 text-gray-800">Verifying...</h2>
-            <p className="text-sm text-gray-600 mb-4">Please wait while we verify you're not a robot.</p>
-            <div className="w-12 h-12 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center w-96">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">Security Check</h2>
+            <p className="text-sm text-gray-600 mb-4">To continue, please verify you're not a robot.</p>
+
+            <div
+              className={`flex items-center justify-start border-2 border-gray-300 rounded px-4 py-2 cursor-pointer hover:shadow-md transition duration-300 ${
+                loadingVerify ? 'opacity-60 pointer-events-none' : ''
+              }`}
+              onClick={handleCaptchaClick}
+            >
+              <div className="w-5 h-5 border-2 border-gray-500 rounded-sm flex items-center justify-center mr-3">
+                {loadingVerify ? (
+                  <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                )}
+              </div>
+              <span className="text-sm text-gray-700">I'm not a robot</span>
+            </div>
+
+            <p className="text-xs mt-2 text-gray-500">This site requires verification to continue.</p>
           </div>
         </div>
       )}
